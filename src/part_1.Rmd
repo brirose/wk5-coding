@@ -48,3 +48,36 @@ chinstraps %>%
 
 ```
 
+
+vectors of body_mass_g for each sex
+
+```{r}
+chinstraps_f <- chinstraps %>% 
+  filter(sex == "female") %>% 
+  pull(body_mass_g)
+
+chinstraps_m <- chinstraps %>% 
+  filter(sex == "male") %>% 
+  pull(body_mass_g)
+```
+
+### TTest time
+ch
+sig difference?
+
+```{r}
+chinstrap_ttest <- t.test(chinstraps_f, chinstraps_m)
+chinstrap_ttest
+
+# effect size
+cohen.d(chinstraps_f, chinstraps_m)
+
+```
+
+
+are male penguins sig *larger* than female (onesided t test)
+
+```{r}
+t.test(chinstraps_m, chinstraps_f, alternative = "greater")
+```
+
