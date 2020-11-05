@@ -81,3 +81,89 @@ are male penguins sig *larger* than female (onesided t test)
 t.test(chinstraps_m, chinstraps_f, alternative = "greater")
 ```
 
+
+# Part 2; One Way ANOVA
+
+
+#Table of Counts
+
+```{r}
+peng_counts <- penguins %>% 
+  count(species, sex)
+
+peng_counts
+
+```
+
+
+## Subset
+
+```{r}
+female_pen <- penguins %>% 
+  filter(sex =="female")
+
+ggplot(female_pen, aes(x = flipper_length_mm)) +
+  geom_histogram(aes(fill = species)) +
+  facet_wrap(~species, scales = "free")
+
+ggplot(female_pen, aes(sample = flipper_length_mm)) +
+  geom_qq(aes(color = species)) +
+  facet_wrap(~species)
+
+```
+
+##Summary Stats
+
+```{r}
+summary_f <- female_pen %>% 
+  group_by(species) %>% 
+  summarise(
+    mean_flipper = mean(flipper_length_mm),
+    sd_flipper = sd(flipper_length_mm),
+    sample_size = n(),
+    se_length = sd(flipper_length_mm/sqrt(n())),
+    var_flipper = var(flipper_length_mm)
+  )
+
+leveneTest(flipper_length_mm ~ species, data = female_pen)
+
+```
+
+
+## Beeswarm with mean +- 1 sd
+
+```{r}
+ggplot() +
+  geom_beeswarm(data = female_pen, aes(x = species, y = flipper_length_mm), color = "gray70", size = 3, alpha = 0.5) +
+  geom_point(data = summary_f, aes(x = species, y = mean_flipper), size = 4)+
+  geom_errorbar(data = summary_f, 
+                aes( x = species,
+                     ymax = mean_flipper + sd_flipper,
+                     ymin = mean_flipper - sd_flipper),
+                  width = 0.1) +
+  theme_light()
+```
+
+
+## One Way Anova
+usually want to do III anova, aov() does type 1
+
+```{r}
+penguin_aov <- aov(flipper_length_mm ~ species, data = female_pen)
+summary(penguin_aov)
+
+TukeyHSD(penguin_aov)
+```
+
+
+
+Type III with car pkg
+```{r}
+penguin_lm <- lm(flipper_length_mm ~ species, data = female_pen)
+penguin_aov_3 <-  Anova(penguin_lm, type = "III")
+penguin_aov_3
+
+```
+
+
+
